@@ -55,7 +55,20 @@
     * Draw conclusions
 
 ## Data Dictionary
-
+| Feature | Definition (measurement)|
+|:--------|:-----------|
+|Fixed Acidity| The fixed amount of tartaric acid. (g/L)|
+|Volatile Acidity| A wine's acetic acid; (High Volatility = High Vinegar-like smell). (g/L)|
+|Citric Acid| The amount of citric acid; (Raises acidity, Lowers shelf-life). (g/L)|
+|Residual Sugar| Leftover sugars after fermentation. (g/L)|
+|Chlorides| Increases sodium levels; (Affects color, clarity, flavor, aroma). (g/L)|
+|Free Sulfur Dioxide| Related to pH. Determines how much SO2 is available. (Increases shelf-life, decreases palatability). (mg/L)|
+|Total Sulfur Dioxide| Summation of free and bound SO2. (Limited to 350ppm: 0-150, low-processed, 150+ highly processed). (mg/L)|
+|Density| Between 1.08 and 1.09. (Insight into fermentation process of yeast growth). (g/L)|
+|pH| 2.5: more acidic - 4.5: less acidic (range)|
+|Sulphates| Added to stop fermentation (Preservative) (g/L)|
+|Alcohol| Related to Residual Sugars. By-product of fermentation process (vol%)|
+|Quality| Score assigned between 0 and 10; 0=low, 10=best|
 
 
 ## Steps to Reproduce
