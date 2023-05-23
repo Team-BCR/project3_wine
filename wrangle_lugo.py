@@ -5,6 +5,10 @@ import os
 
 import matplotlib.pyplot as plt
 
+# Stats
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+
 # ----------------------------------------------------------------------------------
 def check_file_exists(fn, query, url):
     """
@@ -47,28 +51,10 @@ def get_wine_data():
 #                             'calculatedfinishedsquarefeet':'area','taxvaluedollarcnt':'property_value',
 #                             'fips':'county','transaction_0':'transaction_year',
 #                             'transaction_1':'transaction_month','transaction_2':'transaction_day'})
-    
-#     # total outliers removed are 6029 out of 52442
-#     # # Look at properties less than 1.5 and over 5.5 bedrooms (Outliers were removed)
-#     # df = df[~(df['bedrooms'] < 1.5) & ~(df['bedrooms'] > 5.5)]
 
-#     # Look at properties less than .5 and over 4.5 bathrooms (Outliers were removed)
-#     df = df[~(df['bathrooms'] < .5) & ~(df['bathrooms'] > 4.5)]
-
-#     # Look at properties less than 1906.5 and over 2022.5 years (Outliers were removed)
-#     df = df[~(df['yearbuilt'] < 1906.5) & ~(df['yearbuilt'] > 2022.5)]
-
-#     # Look at properties less than -289.0 and over 3863.0 area (Outliers were removed)
-#     df = df[~(df['area'] < -289.0) & ~(df['area'] > 3863.0)]
-
-#     # Look at properties less than -444576.5 and over 1257627.5 property value (Outliers were removed)
-#     df = df[~(df['property_value'] < -444576.5) &  ~(df['property_value'] > 1257627.5)]
     
 #     # replace missing values with "0"
 #     df = df.fillna({'bedrooms':0,'bathrooms':0,'area':0,'property_value':0,'county':0})
-    
-#     # drop any nulls in the dataset
-#     df = df.dropna()
     
 #     # drop all duplicates
 #     df = df.drop_duplicates(subset=['parcelid'])
@@ -79,10 +65,6 @@ def get_wine_data():
 #     # rename the county codes inside county
 #     df['county'] = df['county'].map({6037: 'LA', 6059: 'Orange', 6111: 'Ventura'})
     
-#     # get dummies and concat to the dataframe
-#     dummy_tips = pd.get_dummies(df[['county']], dummy_na=False, drop_first=[True, True])
-#     df = pd.concat([df, dummy_tips], axis=1)
-    
 #     # dropping these columns for right now until I find a use for them
 #     df = df.drop(columns =['parcelid','transactiondate','transaction_year','transaction_month','transaction_day'])
     
@@ -91,12 +73,6 @@ def get_wine_data():
 
 #     # Reindex the DataFrame with the new column order
 #     df = df.reindex(columns=new_column_order)
-
-#     # write the results to a CSV file
-#     df.to_csv('df_prep.csv', index=False)
-
-#     # read the CSV file into a Pandas dataframe
-#     prep_df = pd.read_csv('df_prep.csv')
     
     return df
 # ----------------------------------------------------------------------------------
@@ -109,8 +85,135 @@ def prep_wine_data(df):
 
     df.columns = new_col_name
     
+    # handaling outliers
+    
+    # finding the lower and upper bound outliers for fixed acidity
+    fix_acUP, fix_acLOW = outlier(df,'fixed_acidity')
+    df = df[(df.fixed_acidity < fix_acUP) & (df.fixed_acidity > fix_acLOW)]
+
+    # finding the lower and upper bound outliers for volatile_acidity
+    vol_acUP, vol_acLOW = outlier(df,'volatile_acidity')
+    df = df[(df.volatile_acidity < vol_acUP) & (df.volatile_acidity > vol_acLOW)]
+
+    # finding the lower and upper bound outliers for citric_acid
+    cit_acUP, cit_acLOW = outlier(df,'citric_acid')
+    df = df[(df.citric_acid < cit_acUP) & (df.citric_acid > cit_acLOW)]
+
+    # finding the lower and upper bound outliers for residual_sugar
+    res_sugUP, res_sugLOW = outlier(df,'residual_sugar')
+    df = df[(df.residual_sugar < res_sugUP) & (df.residual_sugar > res_sugLOW)]
+
+    # finding the lower and upper bound outliers for chlorides
+    chloUP, chloLOW = outlier(df,'chlorides')
+    df = df[(df.chlorides < chloUP) & (df.chlorides > chloLOW)]
+
+    # finding the lower and upper bound outliers for free_sulfur_dioxide
+    fsdUP, fsdLOW = outlier(df,'free_sulfur_dioxide')
+    df = df[(df.free_sulfur_dioxide < fsdUP) & (df.free_sulfur_dioxide > fsdLOW)]
+
+    # finding the lower and upper bound outliers for total_sulfur_dioxide
+    tsdUP, tsdLOW = outlier(df,'total_sulfur_dioxide')
+    df = df[(df.total_sulfur_dioxide < tsdUP) & (df.total_sulfur_dioxide > tsdLOW)]
+
+    # finding the lower and upper bound outliers for density
+    denUP, denLOW = outlier(df,'density')
+    df = df[(df.density < denUP) & (df.density > denLOW)]
+
+    # finding the lower and upper bound outliers for ph
+    phUP, phLOW = outlier(df,'ph')
+    df = df[(df.ph < phUP) & (df.ph > phLOW)]
+
+    # finding the lower and upper bound outliers for sulphates
+    sulUP, sulLOW = outlier(df,'sulphates')
+    df = df[(df.sulphates < sulUP) & (df.sulphates > sulLOW)]
+
+    # finding the lower and upper bound outliers for alcohol
+    alcUP, alcLOW = outlier(df,'alcohol')
+    df = df[(df.alcohol < alcUP) & (df.alcohol > alcLOW)]
+    
+    # drop any nulls in the dataset
+    df = df.dropna()
+
+    # get dummies and concat to the dataframe
+    dummy_tips = pd.get_dummies(df[['wine_type']], dummy_na=False, drop_first=[True, True])
+    df = pd.concat([df, dummy_tips], axis=1)
+    
+    df = df.reset_index()
+    df = df.drop(columns = ['index'])
+    
     return df
 
+# ----------------------------------------------------------------------------------
+def get_split(df):
+    '''
+    train=tr
+    validate=val
+    test=ts
+    test size = .2 and .25
+    random state = 123
+    '''  
+    # split your dataset
+    train_validate, ts = train_test_split(df, test_size=.2, random_state=123)
+    tr, val = train_test_split(train_validate, test_size=.25, random_state=123)
+    
+    return tr, val, ts
+# ----------------------------------------------------------------------------------
+def get_Xs_ys_to_scale_baseline(tr, val, ts, target):
+    '''
+    tr = train
+    val = validate
+    ts = test
+    target = target value
+    '''
+    # after getting the dummies drop the county column
+    # tr, val, ts = tr.drop(columns =['county'])
+    
+    # Separate the features (X) and target variable (y) for the training set
+    X_tr, y_tr = tr.drop(columns=[target,'quality']), tr[target]
+    
+    # Separate the features (X) and target variable (y) for the validation set
+    X_val, y_val = val.drop(columns=[target,'quality']), val[target]
+    
+    # Separate the features (X) and target variable (y) for the test set
+    X_ts, y_ts = ts.drop(columns=[target,'quality']), ts[target]
+    
+    # Get the list of columns to be scaled
+    to_scale = X_tr.columns.tolist()
+    
+    # Calculate the baseline (mean) of the target variable in the training set
+    baseline = y_tr.mean()
+    
+    # Return the separated features and target variables, columns to scale, and baseline
+    return X_tr, X_val, X_ts, y_tr, y_val, y_ts, to_scale, baseline
+
+
+# ----------------------------------------------------------------------------------
+def scale_data(X,Xv,Xts,to_scale):
+    '''
+    X = X_train
+    Xv = X_validate
+    Xts = X_test
+    to_scale, is found in the get_Xs_ys_to_scale_baseline
+    '''
+    
+    #make copies for scaling
+    X_tr_sc = X.copy()
+    X_val_sc = Xv.copy()
+    X_ts_sc = Xts.copy()
+
+    #scale them!
+    #make the thing
+    scaler = MinMaxScaler()
+
+    #fit the thing
+    scaler.fit(X[to_scale])
+
+    #use the thing
+    X_tr_sc[to_scale] = scaler.transform(X[to_scale])
+    X_val_sc[to_scale] = scaler.transform(Xv[to_scale])
+    X_ts_sc[to_scale] = scaler.transform(Xts[to_scale])
+    
+    return X_tr_sc, X_val_sc, X_ts_sc
 # ----------------------------------------------------------------------------------
 def nulls_by_col(df):
     """
