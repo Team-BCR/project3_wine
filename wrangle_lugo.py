@@ -23,12 +23,15 @@ def check_file_exists(fn, query, url):
         return df
     
 # ----------------------------------------------------------------------------------
-def get_wine_data():
+def get_wine_data():                          
     # How to import a database from Data.world
     files = ['winequality-red.csv', 'winequality-white.csv']
+    wine_type = ['red_wine', 'white_wine']
+    
     df = pd.DataFrame()
-    for file in files:
+    for i, file in enumerate(files):
         data = pd.read_csv(file)
+        data['wine_type'] = wine_type[i]
         df = pd.concat([df, data], axis=0)
     df.to_csv('merged_winequality.csv', index=False)
 
@@ -125,3 +128,151 @@ def nulls_by_col(df):
                     })
     
     return  cols_missing
+
+
+# ----------------------------------------------------------------------------------
+# def nulls_by_row2(df, index_id = 'customer_id'):
+#     """
+#     """
+#     num_missing = df.isnull().sum(axis=1)
+#     pct_miss = (num_missing / df.shape[1]) * 100
+#     row_missing = df.isnull().sum()
+    
+#     rows_missing = pd.DataFrame({'num_cols_missing': num_missing, 'percent_cols_missing': pct_miss, 'num_rows':row_missing})
+
+#     rows_missing = df.merge(rows_missing,
+#                         left_index=True,
+#                         right_index=True)[['num_cols_missing', 'percent_cols_missing','num_rows']].drop('index', axis=1)
+    
+#     return rows_missing #.sort_values(by='num_cols_missing', ascending=False)
+
+def nulls_by_row(df, index_id='customer_id'):
+    num_missing = df.isnull().sum(axis=1)
+    pct_miss = (num_missing / df.shape[1]) * 100
+    row_missing = num_missing.value_counts().sort_index()
+
+    rows_missing = pd.DataFrame({
+        'num_cols_missing': num_missing,
+        'percent_cols_missing': pct_miss,
+        'num_rows': row_missing
+    }).reset_index()
+
+    result_df = df.merge(rows_missing, left_index=True, right_on='index').drop('index', axis=1)[['num_cols_missing', 'percent_cols_missing', 'num_rows']]
+
+    return result_df #[['num_cols_missing', 'percent_cols_missing', 'num_rows']]
+# ----------------------------------------------------------------------------------
+def get_object_cols(df):
+    '''
+    This function takes in a dataframe and identifies the columns that are object types
+    and returns a list of those column names. 
+    '''
+    # get a list of the column names that are objects (from the mask)
+    object_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+    
+    return object_cols
+
+# ----------------------------------------------------------------------------------
+def get_numeric_cols(df):
+    '''
+    This function takes in a dataframe and identifies the columns that are object types
+    and returns a list of those column names. 
+    '''
+    # get a list of the column names that are objects (from the mask)
+    num_cols = df.select_dtypes(exclude=['object', 'category']).columns.tolist()
+    
+    return num_cols
+# ----------------------------------------------------------------------------------
+def remove_columns(df, cols_to_remove):
+    """
+    This function will:
+    - take in a df and list of columns (you need to create a list of columns that you would like to drop under the name 'cols_to_remove')
+    - drop the listed columns
+    - return the new df
+    """
+    df = df.drop(columns=cols_to_remove)
+    
+    return df
+
+# ----------------------------------------------------------------------------------
+def handle_missing_values(df, prop_required_columns=0.5, prop_required_rows=0.75):
+    """
+    This function will:
+    - take in: 
+        - a dataframe
+        - column threshold (defaulted to 0.5)
+        - row threshold (defaulted to 0.75)
+    - calculates the minimum number of non-missing values required for each column/row to be retained
+    - drops columns/rows with a high proportion of missing values.
+    - returns the new df
+    """
+    
+    column_threshold = int(round(prop_required_columns * len(df.index), 0))
+    df = df.dropna(axis=1, thresh=column_threshold)
+    
+    row_threshold = int(round(prop_required_rows * len(df.columns), 0))
+    df = df.dropna(axis=0, thresh=row_threshold)
+    
+    return df
+
+
+# ----------------------------------------------------------------------------------
+def data_prep(df, col_to_remove=[], prop_required_columns=0.5, prop_required_rows=0.75):
+    """
+    This function will:
+    - take in: 
+        - a dataframe
+        - list of columns
+        - column threshold (defaulted to 0.5)
+        - row threshold (defaulted to 0.75)
+    - removes unwanted columns
+    - remove rows and columns that contain a high proportion of missing values
+    - returns cleaned df
+    """
+    df = remove_columns(df, col_to_remove)
+    df = handle_missing_values(df, prop_required_columns, prop_required_rows)
+    return df
+# ----------------------------------------------------------------------------------
+def get_upper_outliers(s, m=1.5):
+    '''
+    Given a series and a cutoff value, m, returns the upper outliers for the
+    series.
+
+    The values returned will be either 0 (if the point is not an outlier), or a
+    number that indicates how far away from the upper bound the observation is.
+    '''
+    q1, q3 = s.quantile([.25, 0.75])
+    iqr = q3 - q1
+    upper_bound = q3 + (m * iqr)
+    
+    return s.apply(lambda x: max([x - upper_bound, 0]))
+
+# ----------------------------------------------------------------------------------
+def add_upper_outlier_columns(df, m=1.5):
+    '''
+    Add a column with the suffix _outliers for all the numeric columns
+    in the given dataframe.
+    '''
+    for col in df.select_dtypes('number'):
+        df[col + '_outliers_upper'] = get_upper_outliers(df[col], m)
+    return df
+
+# ----------------------------------------------------------------------------------
+# remove all outliers put each feature one at a time
+def outlier(df, feature, m=1.5):
+    '''
+    outlier will take in a dataframe's feature:
+    - calculate it's 1st & 3rd quartiles,
+    - use their difference to calculate the IQR
+    - then apply to calculate upper and lower bounds
+    - using the `m` multiplier
+    '''
+    q1 = df[feature].quantile(.25)
+    q3 = df[feature].quantile(.75)
+    
+    iqr = q3 - q1
+    
+    multiplier = m
+    upper_bound = q3 + (multiplier * iqr)
+    lower_bound = q1 - (multiplier * iqr)
+    
+    return upper_bound, lower_bound
