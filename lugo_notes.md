@@ -51,3 +51,16 @@ ph vs. quality: the LoR is slightly heading upwards
 sulphates vs. quality: the LoR is in heading upwards
 
 alcohol vs. quality: the LoR has a solid upper line
+
+
+
+Modeling:
+
+ran the OLS+RFE, OLS, LARS, Polynomial and GLM models with all 12 features without the target variable "quality" and the best model was the polynomial with 2 degrees. The poly w/2D had the lowest RMSE in train and validate and the highest R2.
+
+
+Test the model without 'density' and 'residual_sugar' and poly_2D was still the best model
+
+Test the model with only the three Kbest features ('volatile_acidity', 'chlorides', and 'alcohol') and poly_2D was still the best model
+
+![image.png](attachment:0c335567-e306-47c3-bec9-344e3cdab21d.png)
