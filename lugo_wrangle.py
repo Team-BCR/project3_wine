@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-#from env import get_db_url
+from env import get_db_url
 import os
 
 import matplotlib.pyplot as plt
@@ -466,3 +466,48 @@ def select_kbest(X,y,k):
     top_k = X.columns[kbest.get_support()]
     
     return top_k
+
+# ----------------------------------------------------------------------------------
+def predict_vs_actual_graph(baseline, y_tr, pred_lr_tr, pred_pr_tr, pred_glm_tr):
+    plt.scatter(pred_lr_tr, y_tr, label='linear regression')
+    plt.scatter(pred_pr_tr, y_tr, label='polynominal 2deg')
+    plt.scatter(pred_glm_tr, y_tr, label='glm')
+    plt.plot(y_tr, y_tr, label='Perfect line of regression', color='grey')
+
+    plt.axhline(baseline, ls=':', color='grey')
+    plt.annotate("Baseline", (65, 81))
+
+    plt.title("Where are predictions more extreme? More modest?")
+    plt.ylabel("Actual Quality")
+    plt.xlabel("Predicted Quality")
+    plt.legend()
+
+    plt.show()
+    
+# ----------------------------------------------------------------------------------
+def residual_scatter(y_tr, pred_lr_tr, pred_pr_tr, pred_glm_tr):
+    plt.axhline(label="No Error")
+
+    plt.scatter(y_tr, pred_lr_tr - y_tr, alpha=.5, color="red", label="LinearRegression")
+    plt.scatter(y_tr, pred_glm_tr - y_tr, alpha=.5, color="yellow", label="TweedieRegressor")
+    plt.scatter(y_tr, pred_pr_tr - y_tr, alpha=.5, color="green", label="Polynomial 2deg ")
+
+    plt.legend()
+    plt.title("Do the size of errors change as the actual value changes?")
+    plt.xlabel("Actual Quality")
+    plt.ylabel("Residual: Predicted Quality - Actual Quality")
+
+    plt.show()
+
+# ----------------------------------------------------------------------------------
+def distribution_actual_vs_predict(y_tr, pred_lr_tr, pred_pr_tr, pred_glm_tr):
+    plt.hist(y_tr, color='blue', alpha=.5, label="Actual")
+    plt.hist(pred_lr_tr, color='red', alpha=.5, label="LinearRegression")
+    plt.hist(pred_glm_tr, color='yellow', alpha=.5, label="TweedieRegressor")
+    plt.hist(pred_pr_tr, color='green', alpha=.5, label="Polynomial 2Deg")
+
+    plt.xlabel("Quality")
+    plt.ylabel("Number of Wines")
+    plt.title("Comparing the Distribution of Actual to Predicted Quality")
+    plt.legend()
+    plt.show()
