@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from env import get_db_url
+#from env import get_db_url
 import os
 
 import matplotlib.pyplot as plt
