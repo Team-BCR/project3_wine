@@ -107,8 +107,14 @@ def plot_residuals(y, yhat):
     df = pd.concat([y, yhat], axis=1)
     df.columns=['y','yhat']
     df['yhat_baseline'] = df.y.mean()
+    # test print
+    print(f'baseline prediction (mean of y_train) = {df.y.mean()}')
+    
     df['residuals'] = df.yhat - df.y
     df['residuals_baseline'] = df.yhat_baseline - df.y
+    
+    print("error testing: printing dataframe from plot_residuals function.")
+    display(df)
     
     # make two subplots for display side-by-side: Model Residuals and Baseline Residuals
     plt.figure(figsize=(16,7))

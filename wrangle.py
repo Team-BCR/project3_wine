@@ -62,7 +62,7 @@ def prep_wine_data(df):
     # get dummies and concat to the dataframe
     dummy_tips = pd.get_dummies(df[['wine_type']], dummy_na=False, drop_first=[True, True])
     df = pd.concat([df, dummy_tips], axis=1)
-    
+           
     df = df.reset_index()
     df = df.drop(columns = ['index'])
     
@@ -201,7 +201,11 @@ def get_models_dataframe(baseline, tr, y_tr, y_val, y_ts, X_tr_sc, X_val_sc, X_t
 
     pred_lr_rfe_val = lr_rfe.predict(X_val_rfe)
     rmse_val, r2_val = metrics_reg(y_val, pred_lr_rfe_val)
-    metrics_df.loc[1] = ['ols+RFE', rmse_tr, rmse_val, r2_val]
+    metrics_df.loc[1] = ['ols with RFE-top-3 features', rmse_tr, rmse_val, r2_val]
+    
+    # This print statement was to figure out which columns were top 3
+    # might be nice to return in the future
+    # print(X_tr_rfe.head())
 
     # OLS
     lr = LinearRegression()
