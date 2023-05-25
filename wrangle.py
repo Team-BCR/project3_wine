@@ -534,3 +534,21 @@ def wrangle_wine():
     df = df.drop(columns=obj_col)
     
     return df
+
+def display_model_metrics(baseline,tr,y_tr,y_val,y_ts,X_tr_sc,X_val_sc,X_ts_sc):
+    """
+    This function will
+    - accept a baseline value (float)
+    - accept the train data set as well as the y splits and the X splits that are scaled
+    - call get_models_dataframe
+    - print a dataframe with the metrics results from get_models_dataframe (only on train and validate)
+        -- (which begs the question why send in test; question for RL)-cah
+    """
+    
+    metrics_df, pred_lr_rfe_tr, pred_lr_tr, pred_lars_tr, pred_pr_tr, pred_glm_tr = get_models_dataframe(baseline
+                                                                                                         ,tr,y_tr,y_val,y_ts
+                                                                                                         ,X_tr_sc,X_val_sc
+                                                                                                         ,X_ts_sc)
+    display(metrics_df)
+    
+    return
