@@ -81,6 +81,11 @@ def get_split(df):
     train_validate, ts = train_test_split(df, test_size=.2, random_state=123)
     tr, val = train_test_split(train_validate, test_size=.25, random_state=123)
     
+    # printing the shape of each split
+    print(f'Train: {tr.shape}')
+    print(f'Validate: {val.shape}')
+    print(f'Test: {ts.shape}')
+    
     return tr, val, ts
 # ----------------------------------------------------------------------------------
 def get_Xs_ys_to_scale_baseline(tr, val, ts, target):
@@ -510,3 +515,22 @@ def distribution_actual_vs_predict(y_tr, pred_lr_tr, pred_pr_tr, pred_glm_tr):
     plt.title("Comparing the Distribution of Actual to Predicted Quality")
     plt.legend()
     plt.show()
+    
+    
+def wrangle_wine():
+    """
+    This function will
+    - read in wine data from csv files into dataframe
+    - prepare with prep_wine_data
+    - remove outliers with execute_outliers
+    - return df ready for splitting/exploring
+    """
+    df = get_wine_data()
+    df = prep_wine_data(df)
+    df = execute_outlier(df)
+
+    # dropping the wine_type column which is a string and we have the data in an encoded column already
+    obj_col = get_object_cols(df)
+    df = df.drop(columns=obj_col)
+    
+    return df
