@@ -10,11 +10,12 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler, QuantileTransformer
 from sklearn.metrics import mean_squared_error, r2_score, explained_variance_score
 
-import wrangle as w
-import evaluate as ev
+import corey_wrangle as w
+import corey_evaluate as ev
 
 import warnings
 warnings.filterwarnings('ignore')
+
 
 # defining function to split train/validate/test into X dataframe and y series
 def get_X_y_baseline(train, validate, test, target='property_value'):

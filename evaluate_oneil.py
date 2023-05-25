@@ -17,6 +17,7 @@ from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import MinMaxScaler
 
 import lugo_wrangle as wl
+import wrangle as wra
 
 ### cluster, stats functions
 
@@ -24,19 +25,19 @@ def density_chlorides_cluster(df):
     '''This function takes in wine data named df, splits it into train, validation, and test sets, scales the data, and performs K-means clustering on the 'density' and 'chlorides' columns. It then assigns the cluster number to a new column in the dataframe. Finally, it bins the 'quality' variable into two categories and returns the resulting training data.'''
     
     # drop the 'wine_type' column
-    df = df.drop('wine_type', axis=1)
+    # df = df.drop('wine_type', axis=1)
     
     # split the data
-    tr, val, ts = wl.get_split(df)
+    tr, val, ts = wra.get_split(df)
     
     # specify the target variable
     target = 'quality'
     
     # get the X and y variables to scale and baseline
-    X_tr, X_val, X_ts, y_tr, y_val, y_ts, to_scale, baseline = wl.get_Xs_ys_to_scale_baseline(tr, val, ts, target)
+    X_tr, X_val, X_ts, y_tr, y_val, y_ts, to_scale, baseline = wra.get_Xs_ys_to_scale_baseline(tr, val, ts, target)
     
     # scale the data
-    X_tr_sc, X_val_sc, X_ts_sc = wl.scale_data(X_tr, X_val, X_ts, to_scale)
+    X_tr_sc, X_val_sc, X_ts_sc = wra.scale_data(X_tr, X_val, X_ts, to_scale)
     
     # extract the 'density' and 'chlorides' columns
     X_tr2 = X_tr_sc[['density', 'chlorides']]
@@ -50,9 +51,9 @@ def density_chlorides_cluster(df):
     tr['quality_cat'] = pd.cut(tr['quality'], bins=[2, 6, 9], labels=['3-6', '7-9'])
     y_tr2 = tr[['quality_cat']]
     
-    return X_tr2, y_tr2, y_tr
+    return tr, val, ts, X_tr, X_val, X_ts, y_tr, y_val, y_ts, to_scale, baseline, X_tr_sc, X_val_sc, X_ts_sc, X_tr2, y_tr2
 
-    
+
 def density_chlorides_cluster_plot(X_tr2, y_tr2):
     '''This function takes in the training data X_tr2 and target variable y_tr2, and creates two scatter plots using Seaborn's relplot function. The first plot shows the clusters, and the second plot shows the clusters with the 'quality_cat' variable added as the hue. The function then displays the plots.'''
     
@@ -84,9 +85,22 @@ def density_chlorides_cluster_ttest(X_tr2, y_tr):
     t_stat, p_value = stat.ttest_ind(cluster_0, cluster_2, equal_var=False)
     print("t-statistic:", t_stat)
     print("p-value:", p_value * 2) # multiply p-value by 2 for a two-tailed test
-    
 
     
     
+X_tr_sc = pd.concat([X_tr_sc, X_tr2['cluster']], axis=1)
+X_val_sc = pd.concat([X_val_sc, X_tr2['cluster']], axis=1) 
     
-    
+dummies = pd.get_dummies(X_tr_sc['cluster'], prefix='cluster', drop_first=True)
+X_tr_sc = pd.concat([X_tr_sc, dummies], axis=1)    
+dummies = pd.get_dummies(X_val_sc['cluster'], prefix='cluster', drop_first=True)
+X_val_sc = pd.concat([X_val_sc, dummies], axis=1)
+
+X_tr_sc = X_tr_sc.drop('cluster', axis=1)
+
+X_val_sc = X_val_sc.drop('cluster', axis=1)
+
+X_val_sc = X_val_sc.dropna()
+
+cm.get_reg_model_metrics_df(X_tr_sc, y_tr, X_val_sc, y_val
+                            ,alpha=1, power=2, degrees=2)
