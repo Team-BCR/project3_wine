@@ -111,6 +111,9 @@ def get_Xs_ys_to_scale_baseline(tr, val, ts, target):
     # Calculate the baseline (mean) of the target variable in the training set
     baseline = y_tr.mean()
     
+    # print baseline to make final_notebook cleaner
+    print(f'Baseline Prediction (mean of quality) = {baseline}')
+    
     # Return the separated features and target variables, columns to scale, and baseline
     return X_tr, X_val, X_ts, y_tr, y_val, y_ts, to_scale, baseline
 
