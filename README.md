@@ -6,24 +6,22 @@
 
 ## Project Goals
 
-* Use clusters to help your exploration, understanding, and modeling of the data.
+* Discover features/clusters helpful in  predicting wine quality
 
-* The target variable you are trying to predict is wine quality (you may decide whether you want to solve this with classification or regression)
-
-* If we use a cluster number as a feature, that cluster should NOT have the target variable of wine quality in it.
+* Use features to develop a machine learning model to predict the quality of wine on a scale of 1-10
 
 * Other key drivers:
-    * 
-    * 
-    * 
-    * 
+    * Is alcohol associated with quality?
+    * Is chlorides associated with quality?
+    * Is residual_sugar associated with quality?
+    * Is alcohol associated with density?
 ## Initial Thoughts
 
-* 
+* There are some key indicators in the data that may predict the 'quality' of wine and that those indicators will be evident by the conclusion of the project.
 
 ## The Plan
 
-* Acquire: build organization repository named Team BCR and invite members. Pull winequality-red.csv and winequality-white.csv into repository. Build .gitignore and env.py files.
+* Acquire: build organization repository named Team BCR and invite members. Pull winequality-red.csv and winequality-white.csv from data.world into repository. Build .gitignore and env.py files.
 
 * Prepare the data using the following columns:
     * target: 12 - quality (score between 0 and 10)
@@ -40,17 +38,18 @@
         * 10 - sulphates
         * 11 - alcohol
 
-* Explore dataset for predictors of property value ('__')
+* Explore dataset for predictors of wine 'quality'
     * Answer the following questions:
-    * 
-    * 
-    * 
-    * 
+    * Is alcohol associated with quality?
+    * Is chlorides associated with quality?
+    * Is residual_sugar associated with quality?
+    * Is alcohol associated with density?
 
 * Develop a model
     * Using the selected data features develop appropriate predictive models
     * Evaluate the models in action using train and validate splits as well as scaled data
     * Choose the most accurate model 
+    * Consider several clusters to enhance the chosen model
     * Evaluate the most accurate model using the final test data set
     * Draw conclusions
 
@@ -75,22 +74,30 @@
 1) Clone the repo git@github.com:Team-BCR/project3_wine.git in terminal
 2) Use personal env.py to connect
 3) Run notebook
+4) Use final_report for findings
 
 ## Takeaways and Conclusions
 Models used:
-* 
-
-* 
-* 
-* 
-* 
-
+* Regression:
+    * Ordinary Least Squares (OLS)
+    * LassoLars
+    * Polynomial Regression
+    * Generalized Linear Model (GLM)
+    
+Exploration Conclusions:
+    * The mean wine quality score is 5.87
+        * all bottles had a score from 1 to 10
+    * No feature correlated more than a .5 correlation coefficient
+        * alcohol was the highest correlation with a .46
+        
+Modeling Conclustions: 
+* Interestingly, sending in all, features even those not correlated with the target, led to the best performing model
+* Clustering did not help.
 
 ## Recommendations
-* 
-* 
-* 
-* 
+* Create wines that optimize the chemical properties as described above
+    * i.e. the higher/lower values that correspond with higher quality scores
+    * This will not guarantee a higher quality wine, but it should increase the probability of creating a higher quality wine
 
 ## Citation
 
